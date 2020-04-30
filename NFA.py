@@ -27,5 +27,5 @@ class NFA:
     def CreateEqeulvantDFA(self):
         pass
 
-    def Schematic(self):
+    def Shape(self):
         pass

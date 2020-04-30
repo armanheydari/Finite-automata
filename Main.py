@@ -26,22 +26,26 @@ class MAIN:
     myDFA = DFA(states, terminals, transitions, finalStates)
     print("what do you want?")
     print("1=Is accepted by NFA")
-    print("2=Find regex")
-    print("3=Create equevalent DFA")
-    print("4=Is accepted by DFA")
-    print("5=Make simple DFA")
-    print("6=Schematic")
+    print("2=Find NFA regex")
+    print("3=Find DFA regex")
+    print("4=Create equevalent DFA")
+    print("5=Is accepted by DFA")
+    print("6=Make simple DFA")
+    print("7=NFA shape")
+    print("8=DFA shape")
     print("0=END")
     while True:
         select = input("write your choise: ")
         if select == '1':
-           print(myNFA.IsAcceptedByNFA(states[0], input("Is accepted by NFA: ")))
+            print(myNFA.IsAcceptedByNFA(states[0], input("Is accepted by NFA: ")))
         # if select=='2':
         # if select=='3':
-        if select == '4':
+        # if select=='4':
+        if select == '5':
             print(myDFA.IsAcceptedByDFA(states[0], input("Is accepted by DFA: ")))
-        # if select=='5':
         # if select=='6':
+        # if select=='7':
+        # if select=='8':
         if select == '0':
             break
 

@@ -24,6 +24,6 @@ class DFA:
 
     def MakeSimpleDFA(self):
         pass
-
-    def Schematic(self):
+    
+    def Shape(self):
         pass
