@@ -1,5 +1,4 @@
 class NFA:
-    # from automata.base.automaton import Automaton
     def __init__(self, states, terminals, transitions, finalStates):
         self.states = states
         self.terminals = terminals
@@ -21,19 +20,6 @@ class NFA:
                     result = self.IsAcceptedByNFA(t[1], s[0:len(s)])
             return result
         return result
-
-        # prevState=self.states[0]
-        # for c in s:
-        #     accept=False
-        #     for t in self.transitions:
-        #         if t[0]==prevState and t[2]==c:
-        #             prevState=t[1]
-        #             accept=True
-        #             break
-
-        #     if(accept==False):
-        #         return False
-        # return True
 
     def FindRegex(self):
         pass
