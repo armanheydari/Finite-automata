@@ -37,13 +37,16 @@ class MAIN:
     while True:
         select = input("write your choise: ")
         if select == '1':
-            print(myNFA.IsAcceptedByNFA(states[0], input("Is accepted by NFA: ")))
-        # if select=='2':
-        # if select=='3':
+            print(myNFA.IsAcceptByNFA(states[0], input("Is accepted by NFA: ")))
+        if select=='2':
+            print(myNFA.FindRegex())
+        if select=='3':
+            print(myDFA.FindRegex())
         # if select=='4':
         if select == '5':
-            print(myDFA.IsAcceptedByDFA(states[0], input("Is accepted by DFA: ")))
-        # if select=='6':
+            print(myDFA.IsAcceptByDFA(states[0], input("Is accepted by DFA: ")))
+        if select=='6':
+            newDFA = myDFA.MakeSimpleDFA()
         # if select=='7':
         # if select=='8':
         if select == '0':
