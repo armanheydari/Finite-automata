@@ -5,7 +5,7 @@ class NFA:
         self.transitions = transitions
         self.finalStates = finalStates
 
-    def IsAcceptedByNFA(self, firstState, s):
+    def IsAcceptByNFA(self, firstState, s):
         result = False
         if(len(s) == 0):
             if(firstState in self.finalStates):
@@ -15,17 +15,19 @@ class NFA:
         else:
             for t in self.transitions:
                 if t[0] == firstState and t[2] == s[0] and result == False:
-                    result = self.IsAcceptedByNFA(t[1], s[1:len(s)])
+                    result = self.IsAcceptByNFA(t[1], s[1:len(s)])
                 elif t[0] == firstState and t[2] == 'landa' and result == False:
-                    result = self.IsAcceptedByNFA(t[1], s[0:len(s)])
+                    result = self.IsAcceptByNFA(t[1], s[0:len(s)])
             return result
         return result
 
     def FindRegex(self):
+        # equalDFA=self.CreateEqeulvantDFA
+        # return equalDFA.FindRegex()
         pass
 
     def CreateEqeulvantDFA(self):
         pass
 
-    def Schematic(self):
+    def Shape(self):
         pass
