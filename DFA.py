@@ -1,4 +1,5 @@
-import copy
+import pygame
+import pygame.gfxdraw
 class DFA:
     def __init__(self, states, terminals, transitions, finalStates):
         self.states = states
@@ -83,53 +84,91 @@ class DFA:
         return newDFA
 
     def Shape(self):
-        pass
+      
+        pygame.init()
 
-    def set_transition_dict(self):
-        dict_states = {r: {c: 'ϕ' for c in self.states} for r in self.states}
-        for i in self.states:
-            for j in self.states:
-                indices = [ii for ii, v in enumerate(self.transitions[i]) if v == j]
-                if len(indices) != 0:
-                    dict_states[i][j] = '+'.join([str(self.terminals[v]) for v in indices])
-        self.ds = dict_states
-        self.transition_dict = copy.deepcopy(dict_states)
-    
-    def get_intermediate_states(self):
-        return [state for state in self.states if state not in ([self.states[0]] + self.finalStates)]
+        BLACK = (  0,   0,   0)
+        WHITE = (255, 255, 255)
+        BLUE =  (  0,   0, 255)
+        GREEN = (  0, 255,   0)
+        RED =   (255,   0,   0)
+        size = [1400, 1000]
+        screen = pygame.display.set_mode(size)
+        
+        pygame.display.set_caption("Example code for the draw module")
+        
+        #Loop until the user clicks the close button.
+        done = False
+        clock = pygame.time.Clock()
+        pygame.font.init()
+        while not done:
+            clock.tick(10)
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    done=True
+            screen.fill(WHITE)
+            dfa = self.CreateEqeulvantDFA()
+            states = {}
+            i = 0
+            for state in dfa.keys():
+                states[state] = str('q' + str(i))
+                i += 1
+            state_num = len(dfa.keys())
+            trasition_num = len(self.transitions)
+            r = 25
+            distance = int(1400 / (state_num+1))
+            for s in range(state_num):
+                pygame.draw.circle(screen, RED, [(distance*(s+1)), 250], r, 0)
+                pygame.draw.circle(screen, BLUE, [(distance*(s+1)), 250], r-4, 0)
+                font = pygame.font.SysFont(None, r+2)
+                text = font.render(str('q' + str(s)), True, BLACK)
+                screen.blit(text, [(distance*(s+1))-10, 240])
 
-    def get_predecessors(self, state):
-        return [key for key, value in self.ds.items() if state in value.keys() and value[state] != 'ϕ' and key != state]
+            pi = 3.14
+            i = 0  
+            for st in dfa.keys():
+                same_path = []
+                if st in self.new_finalstates:
+                    pygame.draw.arc(screen,BLUE,[distance*(i+1)-27, 223, r*2+4, r*2+4], -3.3, 3, 4)
+                i += 1
+                for path in dfa[st].keys():
+                    from_state = states[st]
+                    to_state = states[dfa[st][path]]
+                    diff = int(from_state[1:]) - int(to_state[1:])
+                    abs_diff = abs(diff)
+                    h = abs_diff * 100
+                    font = pygame.font.SysFont(None, r+2)
+                    if len(same_path) != 0 and dfa[st][same_path[0]] == dfa[st][path]:
+                        text = font.render(',' + path, True, BLACK)
+                        w = 10
+                    else:
+                        text = font.render(path, True, BLACK)
+                        same_path.append(path)
+                        w = 0
+                    if abs_diff == 0:
+                        pygame.draw.arc(screen,BLACK,[distance*(int(from_state[1:])+1), 262, 40, 40], -3.3, 1.5, 2)
+                        pygame.draw.polygon(screen, BLACK, [[distance*(int(from_state[1:])+1)+20, 310],
+                                                            [distance*(int(from_state[1:])+1)+20, 290],
+                                                            [distance*(int(from_state[1:])+1)+12, 300]], 4)
+                        screen.blit(text, [distance*(int(to_state[1:])+1)+20+w, 315])
+                    else:
+                        if diff > 0:
+                            pygame.draw.polygon(screen, BLACK, [[distance*(int(to_state[1:])+1) + distance*abs_diff/2, 235-(h/2)],
+                                                                [distance*(int(to_state[1:])+1) + distance*abs_diff/2, 215-(h/2)],
+                                                                [distance*(int(to_state[1:])+1)-8 + distance*abs_diff/2, 225-(h/2)]], 4)
+                            pygame.draw.arc(screen,BLACK,[distance*(int(to_state[1:])+1), 225-(h/2), distance*abs_diff, h], 0, pi, 2)
+                            screen.blit(text, [distance*(int(to_state[1:])+1) + distance*abs_diff/2+w, 240-(h/2)])
+                            
+        
+                        else:
+                            pygame.draw.polygon(screen, BLACK, [[distance*(int(from_state[1:])+1) + distance*abs_diff/2, 335+(h/2)],
+                                                                [distance*(int(from_state[1:])+1) + distance*abs_diff/2, 315+(h/2)],
+                                                                [distance*(int(from_state[1:])+1)+8 + distance*abs_diff/2, 325+(h/2)]], 4)
+                            pygame.draw.arc(screen,BLACK,[distance*(int(from_state[1:])+1), 225-(h/2), distance*abs_diff, h+100], pi, 0, 2)
+                            screen.blit(text, [distance*(int(from_state[1:])+1) + distance*abs_diff/2+w, 290+(h/2)])
+                
 
-    def get_successors(self, state):
-        return [key for key, value in self.ds[state].items() if value != 'ϕ' and key != state]
+            pygame.display.flip()
 
-    def get_if_loop(self, state):
-        if self.ds[state][state] != 'ϕ':
-            return self.ds[state][state]
-        else:
-            return ''
-
-    def toregex(self):
-        intermediate_states = self.get_intermediate_states()
-        dict_states = self.ds
-
-        for inter in intermediate_states:
-            predecessors = self.get_predecessors(inter)
-            successors = self.get_successors(inter)
-            for i in predecessors:
-                for j in successors:
-                    inter_loop = self.get_if_loop(inter)
-                    dict_states[i][j] = '+'.join(('(' + dict_states[i][j] + ')', ''.join(('(' + dict_states[i][
-                        inter] + ')', '(' + inter_loop + ')' + '*', '(' + dict_states[inter][j] + ')'))))
-
-            dict_states = {r: {c: v for c, v in val.items() if c != inter} for r, val in dict_states.items() if
-                           r != inter}
-            self.ds = copy.deepcopy(dict_states)
-
-        init_loop = dict_states[self.states[0]][self.states[0]]
-        init_to_final = dict_states[self.states[0]][self.finalStates[0]] + '(' + dict_states[self.finalStates[0]][
-            self.finalStates[0]] + ')' + '*'
-        final_to_init = dict_states[self.finalStates[0]][self.states[0]]
-        re = '(' + '(' + init_loop + ')' + '+' + '(' + init_to_final + ')' + '(' + final_to_init + ')' + ')' + '*' + '(' + init_to_final + ')'
-        return re
+        pygame.quit()
