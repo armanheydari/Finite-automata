@@ -185,7 +185,6 @@ class NFA:
 
         return dfa
 
-
     def Shape(self):
         self.terminals.append('landa')
         nfa = {}
@@ -197,12 +196,10 @@ class NFA:
                 for j in range(len(self.transitions)):
                     if self.transitions[j][0] == state and self.transitions[j][2] == terminal:
                         nfa[state][terminal].append(self.transitions[j][1])
-        
         for key in nfa.keys():
                 for path in self.terminals:
                     if nfa[key][path] == []:
-                        del nfa[key][path]
-            
+                        del nfa[key][path]       
 
         pygame.init()
         BLACK = (  0,   0,   0)
@@ -213,7 +210,7 @@ class NFA:
         size = [1400, 1000]
         screen = pygame.display.set_mode(size)
         
-        pygame.display.set_caption("Example code for the draw module")
+        pygame.display.set_caption("Finite Automata Shape")
         
         #Loop until the user clicks the close button.
         done = False
@@ -244,45 +241,45 @@ class NFA:
                 if st in self.finalStates:
                     pygame.draw.arc(screen,BLUE,[distance*(i+1)-27, 223, r*2+4, r*2+4], -3.3, 3, 4)
                 i += 1
-                w = 0
                 for path in nfa[st].keys():
-                    from_state = st
-                    to_state = nfa[st][path]
-                    diff = int(from_state[1:]) - int(to_state[w][1:])
-                    abs_diff = abs(diff)
-                    h = abs_diff * 100
-                    font = pygame.font.SysFont(None, r+2)
-                    if len(same_path) != 0 and nfa[st][same_path[0]] == nfa[st][path]:
-                        text = font.render(',' + path, True, BLACK)
-                        w += 1
-                    else:
-                        text = font.render(path, True, BLACK)
-                        same_path.append(path)
-                        w = 0
-                    if abs_diff == 0:
-                        pygame.draw.arc(screen,BLACK,[distance*(int(from_state[1:])+1), 262, 40, 40], -3.3, 1.5, 2)
-                        pygame.draw.polygon(screen, BLACK, [[distance*(int(from_state[1:])+1)+20, 310],
-                                                            [distance*(int(from_state[1:])+1)+20, 290],
-                                                            [distance*(int(from_state[1:])+1)+12, 300]], 4)
-                        screen.blit(text, [distance*(int(to_state[0][1:])+1)+20+(w*10), 315])
-                    else:
-                        if diff > 0:
-                            pygame.draw.polygon(screen, BLACK, [[distance*(int(to_state[0][1:])+1) + distance*abs_diff/2, 235-(h/2)],
-                                                                [distance*(int(to_state[0][1:])+1) + distance*abs_diff/2, 215-(h/2)],
-                                                                [distance*(int(to_state[0][1:])+1)-8 + distance*abs_diff/2, 225-(h/2)]], 4)
-                            pygame.draw.arc(screen,BLACK,[distance*(int(to_state[0][1:])+1), 225-(h/2), distance*abs_diff, h], 0, pi, 2)
-                            screen.blit(text, [distance*(int(to_state[0][1:])+1) + distance*abs_diff/2+(w*10), 240-(h/2)])
-                            
-        
+                    w = 0
+                    rs = 0
+                    for reachable_state in nfa[st][path]:
+                        from_state = st
+                        to_state = reachable_state
+                        diff = int(from_state[1:]) - int(to_state[1:])
+                        abs_diff = abs(diff)
+                        h = abs_diff * 100
+                        font = pygame.font.SysFont(None, r+2)
+                        if len(same_path) != 0 and nfa[st][same_path[0]] == nfa[st][path]:
+                            text = font.render(',' + path, True, BLACK)
+                            w += 1
                         else:
-                            pygame.draw.polygon(screen, BLACK, [[distance*(int(from_state[1:])+1) + distance*abs_diff/2, 335+(h/2)],
-                                                                [distance*(int(from_state[1:])+1) + distance*abs_diff/2, 315+(h/2)],
-                                                                [distance*(int(from_state[1:])+1)+8 + distance*abs_diff/2, 325+(h/2)]], 4)
-                            pygame.draw.arc(screen,BLACK,[distance*(int(from_state[1:])+1), 225-(h/2), distance*abs_diff, h+100], pi, 0, 2)
-                            screen.blit(text, [distance*(int(from_state[1:])+1) + distance*abs_diff/2+w, 290+(h/2)])
-                
-
+                            text = font.render(path, True, BLACK)
+                            same_path.append(path)
+                            w = 0
+                        if abs_diff == 0:
+                            pygame.draw.arc(screen,BLACK,[distance*(int(from_state[1:])+1), 262, 40, 40], -3.3, 1.5, 2)
+                            pygame.draw.polygon(screen, BLACK, [[distance*(int(from_state[1:])+1)+20, 310],
+                                                                [distance*(int(from_state[1:])+1)+20, 290],
+                                                                [distance*(int(from_state[1:])+1)+12, 300]], 4)
+                            screen.blit(text, [distance*(int(to_state[1:])+1)+20+(w*20), 315])
+                        else:
+                            if diff > 0:
+                                pygame.draw.polygon(screen, BLACK, [[distance*(int(to_state[1:])+1) + distance*abs_diff/2, 235-(h/2)],
+                                                                    [distance*(int(to_state[1:])+1) + distance*abs_diff/2, 215-(h/2)],
+                                                                    [distance*(int(to_state[1:])+1)-8 + distance*abs_diff/2, 225-(h/2)]], 4)
+                                pygame.draw.arc(screen,BLACK,[distance*(int(to_state[1:])+1), 225-(h/2), distance*abs_diff, h], 0, pi, 2)
+                                screen.blit(text, [distance*(int(to_state[1:])+1) + distance*abs_diff/2+(w*20), 240-(h/2)])
+                                
+            
+                            else:
+                                pygame.draw.polygon(screen, BLACK, [[distance*(int(from_state[1:])+1) + distance*abs_diff/2, 335+(h/2)],
+                                                                    [distance*(int(from_state[1:])+1) + distance*abs_diff/2, 315+(h/2)],
+                                                                    [distance*(int(from_state[1:])+1)+8 + distance*abs_diff/2, 325+(h/2)]], 4)
+                                pygame.draw.arc(screen,BLACK,[distance*(int(from_state[1:])+1), 225-(h/2), distance*abs_diff, h+100], pi, 0, 2)
+                                screen.blit(text, [distance*(int(from_state[1:])+1) + distance*abs_diff/2+(w*20), 290+(h/2)])
+                        rs += 1
             pygame.display.flip()
-
         pygame.quit()
 

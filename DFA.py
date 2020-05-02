@@ -27,8 +27,7 @@ class DFA:
         return result
 
     def FindRegex(self):
-        print('Define the transition function : ')
-        transition_matrix = [list(map(str, input().split())) for _ in range(len(self.states))]
+        transition_matrix = self.transitions
         transitions = dict(zip(self.states, transition_matrix))
         r = ''
         for f in self.finalStates:
@@ -85,9 +84,23 @@ class DFA:
         return newDFA
 
     def Shape(self):
-      
-        pygame.init()
+        dfa = {}
+        for i in range(len(self.states)):
+            state = self.states[i]
+            dfa[state] = {}
+            for terminal in self.terminals:
+                dfa[state][terminal] = []
+                for j in range(len(self.transitions)):
+                    if self.transitions[j][0] == state and self.transitions[j][2] == terminal:
+                        dfa[state][terminal].append(self.transitions[j][1])
+        
+        for key in dfa.keys():
+                for path in self.terminals:
+                    if dfa[key][path] == []:
+                        del dfa[key][path]
+            
 
+        pygame.init()
         BLACK = (  0,   0,   0)
         WHITE = (255, 255, 255)
         BLUE =  (  0,   0, 255)
@@ -109,76 +122,71 @@ class DFA:
                 if event.type == pygame.QUIT:
                     done=True
             screen.fill(WHITE)
-            dfa = self.CreateEqeulvantDFA()
-            states = {}
             i = 0
-            for state in dfa.keys():
-                states[state] = str('q' + str(i))
-                i += 1
-            state_num = len(dfa.keys())
             trasition_num = len(self.transitions)
             r = 25
-            distance = int(1400 / (state_num+1))
-            for s in range(state_num):
-                pygame.draw.circle(screen, RED, [(distance*(s+1)), 250], r, 0)
-                pygame.draw.circle(screen, BLUE, [(distance*(s+1)), 250], r-4, 0)
+            distance = int(1400 / (len(self.states)+1))
+            for key in dfa.keys():
+                pygame.draw.circle(screen, RED, [(distance*(int(key[1:])+1)), 250], r, 0)
+                pygame.draw.circle(screen, BLUE, [(distance*(int(key[1:])+1)), 250], r-4, 0)
                 font = pygame.font.SysFont(None, r+2)
-                text = font.render(str('q' + str(s)), True, BLACK)
-                screen.blit(text, [(distance*(s+1))-10, 240])
-
+                text = font.render((key), True, BLACK)
+                screen.blit(text, [(distance*(int(key[1:])+1))-10, 240])
+            
             pi = 3.14
             i = 0  
             for st in dfa.keys():
                 same_path = []
-                if st in self.new_finalstates:
+                if st in self.finalStates:
                     pygame.draw.arc(screen,BLUE,[distance*(i+1)-27, 223, r*2+4, r*2+4], -3.3, 3, 4)
                 i += 1
-                for path in dfa[st].keys():
-                    from_state = states[st]
-                    to_state = states[dfa[st][path]]
-                    diff = int(from_state[1:]) - int(to_state[1:])
-                    abs_diff = abs(diff)
-                    h = abs_diff * 100
-                    font = pygame.font.SysFont(None, r+2)
-                    if len(same_path) != 0 and dfa[st][same_path[0]] == dfa[st][path]:
-                        text = font.render(',' + path, True, BLACK)
-                        w = 10
-                    else:
-                        text = font.render(path, True, BLACK)
-                        same_path.append(path)
-                        w = 0
-                    if abs_diff == 0:
-                        pygame.draw.arc(screen,BLACK,[distance*(int(from_state[1:])+1), 262, 40, 40], -3.3, 1.5, 2)
-                        pygame.draw.polygon(screen, BLACK, [[distance*(int(from_state[1:])+1)+20, 310],
-                                                            [distance*(int(from_state[1:])+1)+20, 290],
-                                                            [distance*(int(from_state[1:])+1)+12, 300]], 4)
-                        screen.blit(text, [distance*(int(to_state[1:])+1)+20+w, 315])
-                    else:
-                        if diff > 0:
-                            pygame.draw.polygon(screen, BLACK, [[distance*(int(to_state[1:])+1) + distance*abs_diff/2, 235-(h/2)],
-                                                                [distance*(int(to_state[1:])+1) + distance*abs_diff/2, 215-(h/2)],
-                                                                [distance*(int(to_state[1:])+1)-8 + distance*abs_diff/2, 225-(h/2)]], 4)
-                            pygame.draw.arc(screen,BLACK,[distance*(int(to_state[1:])+1), 225-(h/2), distance*abs_diff, h], 0, pi, 2)
-                            screen.blit(text, [distance*(int(to_state[1:])+1) + distance*abs_diff/2+w, 240-(h/2)])
-                            
-        
-                        else:
-                            pygame.draw.polygon(screen, BLACK, [[distance*(int(from_state[1:])+1) + distance*abs_diff/2, 335+(h/2)],
-                                                                [distance*(int(from_state[1:])+1) + distance*abs_diff/2, 315+(h/2)],
-                                                                [distance*(int(from_state[1:])+1)+8 + distance*abs_diff/2, 325+(h/2)]], 4)
-                            pygame.draw.arc(screen,BLACK,[distance*(int(from_state[1:])+1), 225-(h/2), distance*abs_diff, h+100], pi, 0, 2)
-                            screen.blit(text, [distance*(int(from_state[1:])+1) + distance*abs_diff/2+w, 290+(h/2)])
                 
-
+                for path in dfa[st].keys():
+                    w = 0
+                    rs = 0
+                    for reachable_state in dfa[st][path]:
+                        from_state = st
+                        to_state = reachable_state
+                        diff = int(from_state[1:]) - int(to_state[1:])
+                        abs_diff = abs(diff)
+                        h = abs_diff * 100
+                        font = pygame.font.SysFont(None, r+2)
+                        if len(same_path) != 0 and dfa[st][same_path[0]] == dfa[st][path]:
+                            text = font.render(',' + path, True, BLACK)
+                            w += 1
+                        else:
+                            text = font.render(path, True, BLACK)
+                            same_path.append(path)
+                            w = 0
+                        if abs_diff == 0:
+                            pygame.draw.arc(screen,BLACK,[distance*(int(from_state[1:])+1), 262, 40, 40], -3.3, 1.5, 2)
+                            pygame.draw.polygon(screen, BLACK, [[distance*(int(from_state[1:])+1)+20, 310],
+                                                                [distance*(int(from_state[1:])+1)+20, 290],
+                                                                [distance*(int(from_state[1:])+1)+12, 300]], 4)
+                            screen.blit(text, [distance*(int(to_state[1:])+1)+20+(w*10), 315])
+                        else:
+                            if diff > 0:
+                                pygame.draw.polygon(screen, BLACK, [[distance*(int(to_state[1:])+1) + distance*abs_diff/2, 235-(h/2)],
+                                                                    [distance*(int(to_state[1:])+1) + distance*abs_diff/2, 215-(h/2)],
+                                                                    [distance*(int(to_state[1:])+1)-8 + distance*abs_diff/2, 225-(h/2)]], 4)
+                                pygame.draw.arc(screen,BLACK,[distance*(int(to_state[1:])+1), 225-(h/2), distance*abs_diff, h], 0, pi, 2)
+                                screen.blit(text, [distance*(int(to_state[1:])+1) + distance*abs_diff/2+(w*10), 240-(h/2)])
+                                
+            
+                            else:
+                                pygame.draw.polygon(screen, BLACK, [[distance*(int(from_state[1:])+1) + distance*abs_diff/2, 335+(h/2)],
+                                                                    [distance*(int(from_state[1:])+1) + distance*abs_diff/2, 315+(h/2)],
+                                                                    [distance*(int(from_state[1:])+1)+8 + distance*abs_diff/2, 325+(h/2)]], 4)
+                                pygame.draw.arc(screen,BLACK,[distance*(int(from_state[1:])+1), 225-(h/2), distance*abs_diff, h+100], pi, 0, 2)
+                                screen.blit(text, [distance*(int(from_state[1:])+1) + distance*abs_diff/2+w, 290+(h/2)])
+                        rs += 1
             pygame.display.flip()
-
         pygame.quit()
-        pass
 
     def set_transition_dict(self):
         dict_states = {r: {c: 'ϕ' for c in self.states} for r in self.states}
-        for i in self.states:
-            for j in self.states:
+        for i in range(len(self.states)):
+            for j in range(len(self.states)):
                 indices = [ii for ii, v in enumerate(self.transitions[i]) if v == j]
                 if len(indices) != 0:
                     dict_states[i][j] = '+'.join([str(self.terminals[v]) for v in indices])
