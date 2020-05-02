@@ -5,10 +5,12 @@ class MAIN:
     s = str(input("states:"))
     s = s[1:len(s)-1]
     states = s.split(',')
+    
 
     s = str(input("terminals:"))
     s = s[1:len(s)-1]
     terminals = s.split(',')
+    
 
     n = int(input("transitions number:"))
     transitions = []
@@ -42,13 +44,16 @@ class MAIN:
             print(myNFA.FindRegex())
         if select=='3':
             print(myDFA.FindRegex())
-        # if select=='4':
+        if select=='4':
+            print(myNFA.CreateEqeulvantDFA())
         if select == '5':
             print(myDFA.IsAcceptByDFA(states[0], input("Is accepted by DFA: ")))
         if select=='6':
             newDFA = myDFA.MakeSimpleDFA()
-        # if select=='7':
-        # if select=='8':
+        if select=='7':
+            myNFA.Shape()
+        if select=='8':
+            myDFA.Shape()
         if select == '0':
             break
 
