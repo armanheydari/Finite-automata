@@ -1,12 +1,15 @@
 import pygame
 import pygame.gfxdraw
-
 class DFA:
     def __init__(self, states, terminals, transitions, finalStates):
         self.states = states
         self.terminals = terminals
         self.transitions = transitions
         self.finalStates = finalStates
+        self.regex = ''
+        self.ds = {}
+        self.transition_dict = {}
+        self.set_transition_dict()
 
     def IsAcceptByDFA(self, firstState, s):
         result = False
@@ -23,8 +26,14 @@ class DFA:
         return result
 
     def FindRegex(self):
-        result=""
-        return result
+        print('Define the transition function : ')
+        transition_matrix = [list(map(str, input().split())) for _ in range(len(self.states))]
+        transitions = dict(zip(self.states, transition_matrix))
+        r = ''
+        for f in self.finalStates:
+            dfa = DFA(self.states, self.terminals,transitions,[f])
+            r+= '+' + dfa.toregex()
+        return(r[1:])
 
     def MakeSimpleDFA(self):
         again=True
@@ -75,6 +84,7 @@ class DFA:
         return newDFA
 
     def Shape(self):
+      
         pygame.init()
 
         BLACK = (  0,   0,   0)
@@ -162,5 +172,3 @@ class DFA:
             pygame.display.flip()
 
         pygame.quit()
-
-
