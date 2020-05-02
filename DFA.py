@@ -1,9 +1,14 @@
+import copy
 class DFA:
     def __init__(self, states, terminals, transitions, finalStates):
         self.states = states
         self.terminals = terminals
         self.transitions = transitions
         self.finalStates = finalStates
+        self.regex = ''
+        self.ds = {}
+        self.transition_dict = {}
+        self.set_transition_dict()
 
     def IsAcceptByDFA(self, firstState, s):
         result = False
@@ -20,8 +25,14 @@ class DFA:
         return result
 
     def FindRegex(self):
-        result=""
-        return result
+        print('Define the transition function : ')
+        transition_matrix = [list(map(str, input().split())) for _ in range(len(self.states))]
+        transitions = dict(zip(self.states, transition_matrix))
+        r = ''
+        for f in self.finalStates:
+            dfa = DFA(self.states, self.terminals,transitions,[f])
+            r+= '+' + dfa.toregex()
+        return(r[1:])
 
     def MakeSimpleDFA(self):
         again=True
@@ -73,3 +84,52 @@ class DFA:
 
     def Shape(self):
         pass
+
+    def set_transition_dict(self):
+        dict_states = {r: {c: 'ϕ' for c in self.states} for r in self.states}
+        for i in self.states:
+            for j in self.states:
+                indices = [ii for ii, v in enumerate(self.transitions[i]) if v == j]
+                if len(indices) != 0:
+                    dict_states[i][j] = '+'.join([str(self.terminals[v]) for v in indices])
+        self.ds = dict_states
+        self.transition_dict = copy.deepcopy(dict_states)
+    
+    def get_intermediate_states(self):
+        return [state for state in self.states if state not in ([self.states[0]] + self.finalStates)]
+
+    def get_predecessors(self, state):
+        return [key for key, value in self.ds.items() if state in value.keys() and value[state] != 'ϕ' and key != state]
+
+    def get_successors(self, state):
+        return [key for key, value in self.ds[state].items() if value != 'ϕ' and key != state]
+
+    def get_if_loop(self, state):
+        if self.ds[state][state] != 'ϕ':
+            return self.ds[state][state]
+        else:
+            return ''
+
+    def toregex(self):
+        intermediate_states = self.get_intermediate_states()
+        dict_states = self.ds
+
+        for inter in intermediate_states:
+            predecessors = self.get_predecessors(inter)
+            successors = self.get_successors(inter)
+            for i in predecessors:
+                for j in successors:
+                    inter_loop = self.get_if_loop(inter)
+                    dict_states[i][j] = '+'.join(('(' + dict_states[i][j] + ')', ''.join(('(' + dict_states[i][
+                        inter] + ')', '(' + inter_loop + ')' + '*', '(' + dict_states[inter][j] + ')'))))
+
+            dict_states = {r: {c: v for c, v in val.items() if c != inter} for r, val in dict_states.items() if
+                           r != inter}
+            self.ds = copy.deepcopy(dict_states)
+
+        init_loop = dict_states[self.states[0]][self.states[0]]
+        init_to_final = dict_states[self.states[0]][self.finalStates[0]] + '(' + dict_states[self.finalStates[0]][
+            self.finalStates[0]] + ')' + '*'
+        final_to_init = dict_states[self.finalStates[0]][self.states[0]]
+        re = '(' + '(' + init_loop + ')' + '+' + '(' + init_to_final + ')' + '(' + final_to_init + ')' + ')' + '*' + '(' + init_to_final + ')'
+        return re
