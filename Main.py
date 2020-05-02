@@ -49,7 +49,7 @@ class MAIN:
         if select == '5':
             print(myDFA.IsAcceptByDFA(states[0], input("Is accepted by DFA: ")))
         if select=='6':
-            newDFA = myDFA.MakeSimpleDFA()
+            print(myDFA.MakeSimpleDFA())
         if select=='7':
             myNFA.Shape()
         if select=='8':
