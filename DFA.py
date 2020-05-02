@@ -1,3 +1,4 @@
+import copy
 import pygame
 import pygame.gfxdraw
 class DFA:
@@ -172,3 +173,53 @@ class DFA:
             pygame.display.flip()
 
         pygame.quit()
+        pass
+
+    def set_transition_dict(self):
+        dict_states = {r: {c: 'ϕ' for c in self.states} for r in self.states}
+        for i in self.states:
+            for j in self.states:
+                indices = [ii for ii, v in enumerate(self.transitions[i]) if v == j]
+                if len(indices) != 0:
+                    dict_states[i][j] = '+'.join([str(self.terminals[v]) for v in indices])
+        self.ds = dict_states
+        self.transition_dict = copy.deepcopy(dict_states)
+    
+    def get_intermediate_states(self):
+        return [state for state in self.states if state not in ([self.states[0]] + self.finalStates)]
+
+    def get_predecessors(self, state):
+        return [key for key, value in self.ds.items() if state in value.keys() and value[state] != 'ϕ' and key != state]
+
+    def get_successors(self, state):
+        return [key for key, value in self.ds[state].items() if value != 'ϕ' and key != state]
+
+    def get_if_loop(self, state):
+        if self.ds[state][state] != 'ϕ':
+            return self.ds[state][state]
+        else:
+            return ''
+
+    def toregex(self):
+        intermediate_states = self.get_intermediate_states()
+        dict_states = self.ds
+
+        for inter in intermediate_states:
+            predecessors = self.get_predecessors(inter)
+            successors = self.get_successors(inter)
+            for i in predecessors:
+                for j in successors:
+                    inter_loop = self.get_if_loop(inter)
+                    dict_states[i][j] = '+'.join(('(' + dict_states[i][j] + ')', ''.join(('(' + dict_states[i][
+                        inter] + ')', '(' + inter_loop + ')' + '*', '(' + dict_states[inter][j] + ')'))))
+
+            dict_states = {r: {c: v for c, v in val.items() if c != inter} for r, val in dict_states.items() if
+                           r != inter}
+            self.ds = copy.deepcopy(dict_states)
+
+        init_loop = dict_states[self.states[0]][self.states[0]]
+        init_to_final = dict_states[self.states[0]][self.finalStates[0]] + '(' + dict_states[self.finalStates[0]][
+            self.finalStates[0]] + ')' + '*'
+        final_to_init = dict_states[self.finalStates[0]][self.states[0]]
+        re = '(' + '(' + init_loop + ')' + '+' + '(' + init_to_final + ')' + '(' + final_to_init + ')' + ')' + '*' + '(' + init_to_final + ')'
+        return re
